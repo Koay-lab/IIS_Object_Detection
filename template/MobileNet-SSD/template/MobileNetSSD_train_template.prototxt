@@ -8,6 +8,7 @@ layer {
     phase: TRAIN
   }
   transform_param {
+    force_color: true
     scale: 0.007843
     mirror: true
     mean_value: 127.5
