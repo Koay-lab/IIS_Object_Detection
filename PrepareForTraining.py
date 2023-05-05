@@ -1,10 +1,14 @@
 import io
+import os.path
 import random
 import subprocess
 import shutil
 import sys
 import errno
 from project_package.Config import *
+
+MODULE_PATH = os.path.dirname(__file__)
+
 
 class Pft(object):
 
@@ -216,10 +220,10 @@ class Pft(object):
                 fpwrite.write("{}\n".format(each_class))
 
     def copy_project_package(self, input_config, project_path):
-        outuput_config = os.path.join(project_path, "{}.config".format(config.PROJECT_NAME))
-        shutil.copy2(input_config, outuput_config)
+        output_config = os.path.join(project_path, "{}.config".format(config.PROJECT_NAME))
+        shutil.copy2(input_config, output_config)
 
-        project_package_files_and_folder = glob.glob(os.path.join("project_package","*"))
+        project_package_files_and_folder = glob.glob(os.path.join(MODULE_PATH, "project_package", "*"))
         for each_file_or_folder in project_package_files_and_folder:
             destination = os.path.join(project_path, os.path.basename(each_file_or_folder))
             try:
