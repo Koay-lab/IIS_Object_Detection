@@ -24,7 +24,7 @@ def parse_label_dot_txt(labels_file):
     return labels
 
 
-def parse_test_txt_file(test_file, image_dir, annotation_dir):
+def parse_test_txt_file(test_file):
     dataset = []
     # change this to dynamically load from config
     config = Config.get_latest_config()
@@ -33,16 +33,8 @@ def parse_test_txt_file(test_file, image_dir, annotation_dir):
         lines = lfile.readlines()
         for each_line in lines:
             image, anno = each_line.strip().split(' ')
-            if image_dir is None:
-                abs_image_path = os.path.join(path_to_dataset, image)
-            else:
-                abs_image_path = os.path.join(image_dir, os.path.basename(image))
-
-            if annotation_dir is None:
-                abs_anno_path = os.path.join(path_to_dataset, anno)
-            else:
-                abs_anno_path = os.path.join(annotation_dir, os.path.basename(anno))
-
+            abs_image_path = f"{path_to_dataset}\\{image}"
+            abs_anno_path = f"{path_to_dataset}\\{anno}"
             tup = abs_image_path, abs_anno_path
             dataset.append(tup)
     return dataset
@@ -212,7 +204,7 @@ class DetectionEngine:
                  min_confidence: float = 0.0, image_ext: str = "jpg", image_dir=None, annotation_dir=None):
 
         # images = glob.glob(f"{image_dir}{dirsep}*{image_ext}")
-        files = parse_test_txt_file("test.txt", image_dir, annotation_dir)
+        files = parse_test_txt_file("test.txt")
         pred_output_folder = ""
         xml_output_folder = ""
         img_output_folder = ""
