@@ -58,16 +58,21 @@ def deal_with_single_xml(annotation_xml: str, gt_folder: str):
     root = tree.getroot()
     gt_filename = os.path.basename(annotation_xml).split('.')[0]
     gt_filepath = os.path.join(gt_folder, f'{gt_filename}.txt')
+    bounding_boxes = []
     with open(gt_filepath, 'w') as gt_file:
         for i, obj in enumerate(root.iter('object')):
             cls = obj.find('name').text
             bounding_box = obj.find('bndbox')
-            line_to_write = (cls + ','
-                             + str(int(float(bounding_box.find('xmin').text))) + ','
-                             + str(int(float(bounding_box.find('ymin').text))) + ','
-                             + str(int(float(bounding_box.find('xmax').text))) + ','
-                             + str(int(float(bounding_box.find('ymax').text))) + '\n')
+            # line_to_write = (cls + ','
+            #                  + str(int(float(bounding_box.find('xmin').text))) + ','
+            #                  + str(int(float(bounding_box.find('ymin').text))) + ','
+            #                  + str(int(float(bounding_box.find('xmax').text))) + ','
+            #                  + str(int(float(bounding_box.find('ymax').text))) + '\n')
+            bbox_coordinates = [int(bounding_box.find(coord).text) for coord in ["xmin", "ymin", "xmax", "ymax"]]
+            line_to_write = cls + ',' + ",".join(f"{coord}" for coord in bbox_coordinates) + "\n"
             gt_file.write(line_to_write)
+            bounding_boxes.append(bbox_coordinates)
+    return bounding_boxes
 
 
 def deal_with_xmls(annotation_dir: str, output_dir: str):
@@ -225,7 +230,7 @@ class DetectionEngine:
         gt_folder = os.path.join(output_dir, 'groundtruths')
         make_dir_if_dne(gt_folder)
         for each_image_file, annotation_xml in files:
-            deal_with_single_xml(annotation_xml, gt_folder)
+            groundtruth_boxes = deal_with_single_xml(annotation_xml, gt_folder)
             pred_output_folder = os.path.join(output_dir, 'predictions')
             make_dir_if_dne(pred_output_folder)
             frame = cv2.imread(each_image_file)
@@ -260,6 +265,9 @@ class DetectionEngine:
 
                 # Drawing the prediction and bounding box
                 self.add_bb_to_(frame, each_obj)
+
+            for each_obj in groundtruth_boxes:
+                cv2.rectangle(frame, each_obj[:2], each_obj[2:], [0., 0., 0.], 1)
 
             if metric_output:
                 pred_filename = os.path.basename(each_image_file).split('.')[0]
